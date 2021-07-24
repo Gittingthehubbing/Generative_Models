@@ -4,9 +4,9 @@ Created on Sun May  9 12:06:49 2021
 
 @author: Quiet
 
-Tries to repproduce network in 
+Tries to reproduce and improve the tandem network in 
 Training Deep Neural Networks for the Inverse Design of Nanophotonic Structures
-liu_training_2018
+liu_training_2018 (https://doi.org/10.1021/acsphotonics.7b01377)
 """
 import numpy as np
 import pandas as pd
@@ -185,7 +185,7 @@ retrainRToD = True
 testSingleOverfit = False
 
 propertiesDict={
-    "nSamples":5000,
+    "nSamples":50000,
     "batchSize":2**10,
     "testSplit":0.35,
     "epochs":200,
@@ -416,7 +416,7 @@ else:
         plt.title('Tandem Network')
         
         plt.savefig(f'{folderName}/TandemNet.png',dpi=300)
-        plt.show()
+        #plt.show()
         plt.close()
         
         hardTest = np.ones_like(firstY[:1])
@@ -430,7 +430,7 @@ else:
         plt.plot(wvls,hardTest[0],label='Real')
         plt.plot(wvls,hardSpecPred[0],label='Fake')
         plt.legend()
-        plt.show()
+        #plt.show()
         plt.close()
         
         with t.no_grad():
@@ -439,7 +439,7 @@ else:
         
         plt.plot(wvls,gaussOut[0])
         plt.plot(wvls,gaussSpec)
-        plt.show()
+        #plt.show()
         plt.close()
         
         gridSize = 3

@@ -192,6 +192,8 @@ propertiesDict={
     "opti":"Adam",
     "lossF":"MSE",
     "lr":5.9194e-4,
+    "lr_decay":1e-4,
+    "lr_decay_step_size":50,
     "weightDecay":1e-4,
     "nL":5,
     "inShape":2,
@@ -252,6 +254,7 @@ else:
 
 criticDToR = nn.MSELoss()
 optiDToR = t.optim.Adam(dToRNet.parameters(),lr=propertiesDict["lr"],weight_decay=propertiesDict["weightDecay"])
+lr_scheudler_DToR = t.optim.lr_scheduler.StepLR(optiDToR,propertiesDict["lr_decay_step_size"],gamma=propertiesDict["lr_decay"])
 epochs = propertiesDict["epochs"]
 batchSize = propertiesDict["batchSize"]
 
@@ -277,6 +280,7 @@ if testSingleOverfit:
         lossSqrt = loss
         lossSqrt.backward()
         optiDToR.step()
+        lr_scheudler_DToR.step()
         tempDf = pd.DataFrame({'Loss':lossSqrt.cpu().detach().numpy()},index=[num])
         lossDf = lossDf.append(tempDf)
         
@@ -322,6 +326,7 @@ else:
                             evalDf = evalDf.append(tempDfT)
                             evalLossTempDToR = evalLossTempDToR.append(tempDfT)
                     dToRNet.train()
+            lr_scheudler_DToR.step()
             epochLossDfTrainDToR.append(trainLossTempDToR.mean().values.item())
             epochLossDfEvalDToR.append(evalLossTempDToR.mean().values.item())
             writer.add_scalar("TrainLossEpoch", trainLossTempDToR.mean().values.item(),e)
@@ -346,14 +351,14 @@ else:
         
         lossforplot = np.sqrt(np.mean(np.subtract(forPlotReal,forPlotFake)**2)/2)
         
-        fig,axs = plt.subplots(2,1,figsize=(6,8),dpi=300)
+        fig,axs = plt.subplots(2,1,figsize=(6,8),dpi=300,tight_layout=True)
         # axs[0].plot(lossDf.rolling(10).mean().values,'k-',label='TrainLoss')
         # axs[0].plot(evalDf.rolling(10).mean().values,'r-',label='TestLoss')
         axs[0].plot(epochLossDfTrainDToR,'k.-',label='TrainLoss')
         axs[0].plot(epochLossDfEvalDToR,'r.-',label='TestLoss')
         axs[0].legend()    
         axs[0].set_yscale('log')
-        axs[0].set_ylim((epochLossDfTrainDToR[-1],epochLossDfTrainDToR[5]))
+        #axs[0].set_ylim((epochLossDfTrainDToR[-1],epochLossDfTrainDToR[5]))
         axs[1].plot(wvls,forPlotFake,label=f'fake with Loss {lossforplot:.3f}')
         axs[1].plot(wvls, forPlotReal)
         axs[1].legend()
